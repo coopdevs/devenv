@@ -43,3 +43,17 @@ The script will:
 * Install python2.7 in container
 
 When the execution ends, you have a container ready to provision and deploy the app.
+
+## Makefile
+
+> It needs `sudo` password to create symlinks to `/usr/bin`, `/usr/sbin` and other protected directories.
+
+Added a `Makefile` to "install" the scripts in the system.
+
+This Makefile creates symlinks from the scripts to the correct `PATH` directory:
+
+* `create-container.sh` --> Linked in `/usr/sbin/`
+
+More info about [Filesystem Hierarchy](https://jlk.fjfi.cvut.cz/arch/manpages/man/file-hierarchy.7)
+
+
