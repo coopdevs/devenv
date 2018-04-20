@@ -1,5 +1,5 @@
 create-container:
-	ln -fsn $(shell pwd)/create-container.sh /usr/sbin/create-container.sh
+	sudo ln -fsn $(shell pwd)/create-container.sh /usr/sbin/create-container.sh
 
 all: create-container
 
