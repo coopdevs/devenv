@@ -128,10 +128,6 @@ sudo lxc-attach -n "$NAME" -- sudo apt install -y python2.7
 echo "Installing SSH server in container $NAME"
 sudo lxc-attach -n "$NAME" -- sudo apt install -y openssh-server
 
-# Run `sysadmins` playbook
-echo "Adding user $USER as system administrator to $HOST"
-ansible-playbook playbooks/sys_admins.yml --limit dev -u root
-
 # Ready to provision the container
 echo "Very well! LXC container $NAME has been created and configured"
 echo
