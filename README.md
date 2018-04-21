@@ -52,7 +52,7 @@ Added a `Makefile` to "install" the scripts in the system.
 
 This Makefile creates symlinks from the scripts to the correct `PATH` directory:
 
-* `create-container.sh` --> Linked in `/usr/sbin/`
+* `devenv.sh` --> Linked in `/usr/sbin/`
 
 More info about [Filesystem Hierarchy](https://jlk.fjfi.cvut.cz/arch/manpages/man/file-hierarchy.7)
 

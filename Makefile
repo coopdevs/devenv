@@ -1,6 +1,6 @@
-create-container:
-	sudo ln -fsn $(shell pwd)/create-container.sh /usr/sbin/create-container.sh
+devenv:
+	sudo ln -fsn $(shell pwd)/create-container.sh /usr/sbin/devenv.sh
 
-all: create-container
+all: devenv
 
 .PHONY: all
