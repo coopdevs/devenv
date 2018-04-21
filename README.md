@@ -12,9 +12,11 @@ The script `create-container.sh` will help you to create a development environme
 ### Execution
 
 To run the `create-container.sh`, you need create a configuration file in your repository main path.
-It must be named `.devenv.cfg` with the next vars declared:
+It must be named `.devenv` with the next vars declared:
 
 ```
+# <PROJECT_PATH>/.devenv file
+
 NAME="<container name>"
 DISTRIBUTION="<SO distribution>"
 RELEASE="<SO release>"
