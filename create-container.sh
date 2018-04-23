@@ -7,7 +7,6 @@ set -e
 
 # Load configuration
 # shellcheck source=/dev/null
-source "$PWD/scripts/config/lxc.cfg"
 source "$PWD/.devenv"
 
 RETRIES=5
