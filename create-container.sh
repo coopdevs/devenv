@@ -110,12 +110,12 @@ sudo lxc-attach -n "$NAME" -- /bin/bash -c "/bin/mkdir -p /root/.ssh && echo $ss
 # sudo lxc-attach -n "$NAME" -- /usr/sbin/userdel -r "$existing_user"
 
 # Create group with same `gid` of project directory
-# sudo lxc-attach -n "$NAME" -- /usr/sbin/groupadd --gid "$project_gid" "$DEVENV_GROUP"
-sudo lxc-attach -n "$NAME" -- /usr/sbin/groupadd "$DEVENV_GROUP"
+# sudo lxc-attach -n "$NAME" -- /usr/sbin/groupadd -f --gid "$project_gid" "$DEVENV_GROUP"
+sudo lxc-attach -n "$NAME" -- /usr/sbin/groupadd -f "$DEVENV_GROUP"
 
 # Create user with same `uid` and `gid` of project directory
-# sudo lxc-attach -n "$NAME" -- /usr/sbin/useradd --uid "$project_uid" --gid "$project_gid" --create-home --shell /bin/bash "$DEVENV_USER"
-sudo lxc-attach -n "$NAME" -- /usr/sbin/useradd --create-home --shell /bin/bash -g "$DEVENV_GROUP" "$DEVENV_USER"
+# sudo lxc-attach -n "$NAME" -- /usr/bin/id -u "$DEVENV_USER" &>/dev/null || /usr/sbin/useradd --uid "$project_uid" --gid "$project_gid" --create-home --shell /bin/bash "$DEVENV_USER"
+sudo lxc-attach -n "$NAME" -- /usr/bin/id -u "$DEVENV_USER" &>/dev/null || /usr/sbin/useradd --create-home --shell /bin/bash -g "$DEVENV_GROUP" "$DEVENV_USER"
 
 # Add system user's SSH public key to user
 echo "Copying system user's SSH public key to $DEVENV_USER user in container"
