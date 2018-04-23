@@ -13,6 +13,7 @@ source "$PWD/.devenv"
 RETRIES=5
 
 # Create LXC config file
+LXC_CONFIG="/tmp/$DISTRIBUTION.$NAME.conf"
 echo "Creating config file: $LXC_CONFIG"
 cat > "$LXC_CONFIG" <<EOL
 # Network
