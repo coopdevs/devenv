@@ -24,6 +24,8 @@ ARCH="<SO arch>"
 HOST="local.$NAME.coop"
 PROJECT_NAME="<project name>"
 PROJECT_PATH="${PWD%/*}/$PROJECT_NAME"
+DEVENV_USER="<user that will own the project>"
+DEVENV_GROUP="<group that will own the project>"
 ```
 
 Then run `create-container.sh` in your project path.
@@ -35,8 +37,8 @@ The script will:
 * Create container
 * Mount your project directory into container in `/opt/<project_name>`
 * Add container IP to `/etc/hosts`
-* Create a group with same `gid` of project directory
-* Create a user with same `uid` and `gid` of project directory
+* Create a group with same `gid` of project directory and named `$DEVENV_GROUP`
+* Create a user with same `uid` and `gid` of project directory and named `$DEVENV_USER`
 * Add system user's SSH public key to user
 * Install python2.7 in container
 

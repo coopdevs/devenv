@@ -34,6 +34,8 @@ echo "  - LXC Configuration: $LXC_CONFIG"
 echo "  - Host: $HOST"
 echo "  - Project Name: $PROJECT_NAME"
 echo "  - Project Directory: $PROJECT_PATH"
+echo "  - User: $DEVENV_USER"
+echo "  - Group: $DEVENV_GROUP"
 echo
 
 # Create container
@@ -108,17 +110,17 @@ sudo lxc-attach -n "$NAME" -- /bin/bash -c "/bin/mkdir -p /root/.ssh && echo $ss
 # existing_user=$(sudo lxc-attach -n "$NAME" -- id -nu "$project_uid" 2>&1)
 # sudo lxc-attach -n "$NAME" -- /usr/sbin/userdel -r "$existing_user"
 
-# Create `odoo` group with same `gid` of project directory
-# sudo lxc-attach -n "$NAME" -- /usr/sbin/groupadd --gid "$project_gid" odoo
-sudo lxc-attach -n "$NAME" -- /usr/sbin/groupadd odoo
+# Create group with same `gid` of project directory
+# sudo lxc-attach -n "$NAME" -- /usr/sbin/groupadd --gid "$project_gid" "$DEVENV_GROUP"
+sudo lxc-attach -n "$NAME" -- /usr/sbin/groupadd "$DEVENV_GROUP"
 
-# Create `odoo` user with same `uid` and `gid` of project directory
-# sudo lxc-attach -n "$NAME" -- /usr/sbin/useradd --uid "$project_uid" --gid "$project_gid" --create-home --shell /bin/bash odoo
-sudo lxc-attach -n "$NAME" -- /usr/sbin/useradd --create-home --shell /bin/bash -g odoo odoo
+# Create user with same `uid` and `gid` of project directory
+# sudo lxc-attach -n "$NAME" -- /usr/sbin/useradd --uid "$project_uid" --gid "$project_gid" --create-home --shell /bin/bash "$DEVENV_USER"
+sudo lxc-attach -n "$NAME" -- /usr/sbin/useradd --create-home --shell /bin/bash -g "$DEVENV_GROUP" "$DEVENV_USER"
 
-# Add system user's SSH public key to `odoo` user
-echo "Copying system user's SSH public key to 'odoo' user in container"
-sudo lxc-attach -n "$NAME" -- sudo -u odoo -- sh -c "/bin/mkdir -p /home/odoo/.ssh && echo $ssh_key > /home/odoo/.ssh/authorized_keys"
+# Add system user's SSH public key to user
+echo "Copying system user's SSH public key to $DEVENV_USER user in container"
+sudo lxc-attach -n "$NAME" -- sudo -u "$DEVENV_USER" -- sh -c "/bin/mkdir -p /home/$DEVENV_USER/.ssh && echo $ssh_key > /home/$DEVENV_USER/.ssh/authorized_keys"
 
 # Install python2.7 in container
 echo "Installing Python2.7 in container $NAME"
@@ -133,7 +135,7 @@ sudo lxc-attach -n "$NAME" -- sudo apt install -y openssh-server
 echo "Very well! LXC container $NAME has been created and configured"
 echo
 echo "You should be able to access using:"
-echo "> ssh odoo@$HOST"
+echo "> ssh $DEVENV_USER@$HOST"
 echo
 echo "To install all the dependencies run:"
 echo "> ansible-playbook playbooks/provision.yml --limit=dev"
