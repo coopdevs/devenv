@@ -1,18 +1,21 @@
 # devenv
+A `bash` script to create and manage development environments using [LXC](https://linuxcontainers.org/) linux containers.
 
-## Create container - Using LXC Containers
-
-Added `create_container.sh`. A `bash` script to create and manage containers with [LXC](https://linuxcontainers.org/) linux containers.
-The script `create-container.sh` will help you to create a development environment using LXC containers.
-
-### Requirements
+## Requirements
 
 * LXC >= 2.1
 
-### Execution
+## Install
+Run `make` to install the script in your system.
 
-To run the `create-container.sh`, you need create a configuration file in your repository main path.
-It must be named `.devenv` with the following variables declared:
+The script will ask for `sudo` password to create a symlink in `/usr/sbin`.
+
+### Why in /usr/sbin?
+Please give a look at [Filesystem Hierarchy](https://jlk.fjfi.cvut.cz/arch/manpages/man/file-hierarchy.7).
+
+## Execution
+
+To run the `devenv` script you need to create a `.devenv` configuration file in your project directory containing the following variables:
 
 ```
 # <PROJECT_PATH>/.devenv file
@@ -28,13 +31,13 @@ DEVENV_USER="<user that will own the project>"
 DEVENV_GROUP="<group that will own the project>"
 ```
 
-Then run `create-container.sh` in your project path.
+Then run `devenv` in your project directory.
 
-### Description
+## Description
 
 The script will:
 
-* Create container
+* Create a container
 * Mount your project directory into container in `/opt/<project_name>`
 * Add container IP to `/etc/hosts`
 * Create a group with same `gid` of project directory and named `$DEVENV_GROUP`
@@ -42,4 +45,4 @@ The script will:
 * Add system user's SSH public key to user
 * Install python2.7 in container
 
-When the execution ends, you have a container ready to provision and deploy the app.
+When the execution ends, you'll have a container ready to provision and deploy your project.
