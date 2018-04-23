@@ -44,16 +44,10 @@ The script will:
 
 When the execution ends, you have a container ready to provision and deploy the app.
 
-## Makefile
+## Install
+Run `make` to install the script in your system.
 
-> It needs `sudo` password to create symlinks to `/usr/bin`, `/usr/sbin` and other protected directories.
+The script will ask for `sudo` password to create a symlink in `/usr/sbin`.
 
-Added a `Makefile` to "install" the scripts in the system.
-
-This Makefile creates symlinks from the scripts to the correct `PATH` directory:
-
-* `devenv.sh` --> Linked in `/usr/sbin/`
-
-More info about [Filesystem Hierarchy](https://jlk.fjfi.cvut.cz/arch/manpages/man/file-hierarchy.7)
-
-
+### Why in /usr/sbin?
+Please give a look at [Filesystem Hierarchy](https://jlk.fjfi.cvut.cz/arch/manpages/man/file-hierarchy.7).
