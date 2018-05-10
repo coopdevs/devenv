@@ -21,7 +21,7 @@ lxc.net.0.flags = up
 lxc.net.0.link = lxcbr0
 
 # Volumes
-# lxc.mount.entry = $PROJECT_PATH /var/lib/lxc/$NAME/rootfs/opt/$PROJECT_NAME none bind,create=dir 0.0
+lxc.mount.entry = $PROJECT_PATH /var/lib/lxc/$NAME/rootfs/opt/$PROJECT_NAME none bind,create=dir 0.0
 EOL
 
 # Print configuration
@@ -98,24 +98,22 @@ echo "Copying system user's SSH public key to 'root' user in container"
 sudo lxc-attach -n "$NAME" -- /bin/bash -c "/bin/mkdir -p /root/.ssh && echo $ssh_key > /root/.ssh/authorized_keys"
 
 # Find `uid` of project directory
-# project_user=$(stat -c '%U' "$PROJECT_PATH")
-# project_uid=$(id -u "$project_user")
+project_user=$(stat -c '%U' "$PROJECT_PATH")
+project_uid=$(id -u "$project_user")
 
 # Find `gid` of project directory
-# project_group=$(stat -c '%G' "$PROJECT_PATH")
-# project_gid=$(id -g "$project_group")
+project_group=$(stat -c '%G' "$PROJECT_PATH")
+project_gid=$(id -g "$project_group")
 
 # Delete existing user with same uid and gid of project directory
-# existing_user=$(sudo lxc-attach -n "$NAME" -- id -nu "$project_uid" 2>&1)
-# sudo lxc-attach -n "$NAME" -- /usr/sbin/userdel -r "$existing_user"
+existing_user=$(sudo lxc-attach -n "$NAME" -- id -nu "$project_uid" 2>&1)
+sudo lxc-attach -n "$NAME" -- /usr/sbin/userdel -r "$existing_user"
 
 # Create group with same `gid` of project directory
-# sudo lxc-attach -n "$NAME" -- /usr/sbin/groupadd -f --gid "$project_gid" "$DEVENV_GROUP"
-sudo lxc-attach -n "$NAME" -- /usr/sbin/groupadd -f "$DEVENV_GROUP"
+sudo lxc-attach -n "$NAME" -- /usr/sbin/groupadd -f --gid "$project_gid" "$DEVENV_GROUP"
 
 # Create user with same `uid` and `gid` of project directory
-# sudo lxc-attach -n "$NAME" -- /bin/sh -c "/usr/bin/id -u $DEVENV_USER || /usr/sbin/useradd --uid $project_uid --gid $project_gid --create-home --shell /bin/bash $DEVENV_USER"
-sudo lxc-attach -n "$NAME" -- /bin/sh -c "/usr/bin/id -u $DEVENV_USER || /usr/sbin/useradd --create-home --shell /bin/bash -g $DEVENV_GROUP $DEVENV_USER"
+sudo lxc-attach -n "$NAME" -- /bin/sh -c "/usr/bin/id -u $DEVENV_USER || /usr/sbin/useradd --uid $project_uid --gid $project_gid --create-home --shell /bin/bash $DEVENV_USER"
 
 # Add system user's SSH public key to user
 echo "Copying system user's SSH public key to $DEVENV_USER user in container"
