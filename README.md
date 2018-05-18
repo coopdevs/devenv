@@ -27,6 +27,7 @@ ARCH="<SO arch>"
 HOST="local.$NAME.coop"
 PROJECT_NAME="<project name>"
 PROJECT_PATH="${PWD%/*}/$PROJECT_NAME"
+BASE_PATH="/opt"
 DEVENV_USER="<user that will own the project>"
 DEVENV_GROUP="<group that will own the project>"
 ```
@@ -38,7 +39,7 @@ Then run `devenv` in your project directory.
 The script will:
 
 * Create a container
-* Mount your project directory into container in `/opt/<project_name>`
+* Mount your project directory into container in `/<BASE_PATH>/<PROJECT_NAME>`
 * Add container IP to `/etc/hosts`
 * Create a group with same `gid` of project directory and named `$DEVENV_GROUP`
 * Create a user with same `uid` and `gid` of project directory and named `$DEVENV_USER`
