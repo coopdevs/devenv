@@ -114,7 +114,7 @@ sudo lxc-attach -n "$NAME" -- /bin/bash -c "/bin/mkdir -p /root/.ssh && echo $ss
 
 # User management related with projects folder
 # If PROJECT_PATH is not set, use the defaults project_uid and project_gid
-if  [ -v PROJECT_PATH ] ; then
+if  [ -v "$PROJECT_PATH" ] ; then
   # Find `uid` of project directory
   project_user=$(stat -c '%U' "$PROJECT_PATH")
   project_uid=$(id -u "$project_user")
