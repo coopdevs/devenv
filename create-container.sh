@@ -112,6 +112,7 @@ read -r ssh_key < "$ssh_path"
 echo "Copying system user's SSH public key to 'root' user in container"
 sudo lxc-attach -n "$NAME" -- /bin/bash -c "/bin/mkdir -p /root/.ssh && echo $ssh_key > /root/.ssh/authorized_keys"
 
+# User management related with projects folder
 # If PROJECT_PATH is not set, use the defaults project_uid and project_gid
 if  [ -v PROJECT_PATH ] ; then
   # Find `uid` of project directory
@@ -123,6 +124,8 @@ if  [ -v PROJECT_PATH ] ; then
   project_gid=$(id -g "$project_group")
 fi
 
+# User management
+# If DEVENV_USER or DEVENV_GROUP is not set, the defaults user is not deleted.
 if [ -v DEVENV_USER ] || [ -v DEVENV_GROUP ]; then
   # Delete existing user with same uid and gid of project directory
   existing_user=$(sudo lxc-attach -n "$NAME" -- id -nu "$project_uid" 2>&1)
