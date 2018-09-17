@@ -123,19 +123,21 @@ if  [ -v PROJECT_PATH ] ; then
   project_gid=$(id -g "$project_group")
 fi
 
-# Delete existing user with same uid and gid of project directory
-existing_user=$(sudo lxc-attach -n "$NAME" -- id -nu "$project_uid" 2>&1)
-sudo lxc-attach -n "$NAME" -- /usr/sbin/userdel -r "$existing_user"
+if [ -v DEVENV_USER ] || [ -v DEVENV_GROUP ]; then
+  # Delete existing user with same uid and gid of project directory
+  existing_user=$(sudo lxc-attach -n "$NAME" -- id -nu "$project_uid" 2>&1)
+  sudo lxc-attach -n "$NAME" -- /usr/sbin/userdel -r "$existing_user"
 
-# Create group with same `gid` of project directory
-sudo lxc-attach -n "$NAME" -- /usr/sbin/groupadd -f --gid "$project_gid" "$DEVENV_GROUP"
+  # Create group with same `gid` of project directory
+  sudo lxc-attach -n "$NAME" -- /usr/sbin/groupadd -f --gid "$project_gid" "$DEVENV_GROUP"
 
-# Create user with same `uid` and `gid` of project directory
-sudo lxc-attach -n "$NAME" -- /bin/sh -c "/usr/bin/id -u $DEVENV_USER || /usr/sbin/useradd --uid $project_uid --gid $project_gid --create-home --shell /bin/bash $DEVENV_USER"
+  # Create user with same `uid` and `gid` of project directory
+  sudo lxc-attach -n "$NAME" -- /bin/sh -c "/usr/bin/id -u $DEVENV_USER || /usr/sbin/useradd --uid $project_uid --gid $project_gid --create-home --shell /bin/bash $DEVENV_USER"
 
-# Add system user's SSH public key to user
-echo "Copying system user's SSH public key to $DEVENV_USER user in container"
-sudo lxc-attach -n "$NAME" -- sudo -u "$DEVENV_USER" -- sh -c "/bin/mkdir -p /home/$DEVENV_USER/.ssh && echo $ssh_key > /home/$DEVENV_USER/.ssh/authorized_keys"
+  # Add system user's SSH public key to user
+  echo "Copying system user's SSH public key to $DEVENV_USER user in container"
+  sudo lxc-attach -n "$NAME" -- sudo -u "$DEVENV_USER" -- sh -c "/bin/mkdir -p /home/$DEVENV_USER/.ssh && echo $ssh_key > /home/$DEVENV_USER/.ssh/authorized_keys"
+fi
 
 # Debian Stretch Sudo install
 sudo lxc-attach -n "$NAME" -- apt install sudo
