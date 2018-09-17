@@ -25,8 +25,18 @@ lxc.net.0.flags = up
 lxc.net.0.link = lxcbr0
 
 # Volumes
-lxc.mount.entry = $PROJECT_PATH /var/lib/lxc/$NAME/rootfs/$BASE_PATH/$PROJECT_NAME none bind,create=dir 0.0
 EOL
+
+# TODO - We can extract all this conditions in functions and separate in files
+# Mount folder if PROJECT_PATH is defined
+if [ ! -v BASE_PATH ] ; then
+  BASE_PATH="/opt/"
+fi
+
+if [ -v PROJECT_PATH ] ; then
+  mount_entry="lxc.mount.entry = $PROJECT_PATH /var/lib/lxc/$NAME/rootfs$BASE_PATH$PROJECT_NAME none bind,create=dir 0.0"
+  echo "$mount_entry" >> "$LXC_CONFIG"
+fi
 
 # Print configuration
 echo "* CONFIGURATION:"
@@ -37,7 +47,7 @@ echo "  - LXC Configuration: $LXC_CONFIG"
 echo "  - Host: $HOST"
 echo "  - Project Name: $PROJECT_NAME"
 echo "  - Project Directory: $PROJECT_PATH"
-echo "  - Will mount on: $BASE_PATH/$PROJECT_NAME"
+echo "  - Will mount on: $BASE_PATH$PROJECT_NAME"
 echo "  - User: $DEVENV_USER"
 echo "  - Group: $DEVENV_GROUP"
 echo
