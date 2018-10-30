@@ -120,6 +120,10 @@ sudo lxc-attach -n "$NAME" -- /bin/sh -c "/usr/bin/id -u $DEVENV_USER || /usr/sb
 echo "Copying system user's SSH public key to $DEVENV_USER user in container"
 sudo lxc-attach -n "$NAME" -- sudo -u "$DEVENV_USER" -- sh -c "/bin/mkdir -p /home/$DEVENV_USER/.ssh && echo $ssh_key > /home/$DEVENV_USER/.ssh/authorized_keys"
 
+# Debian Stretch Sudo install
+if [ $DISTRIBUTION == "debian" ] && [ $RELEASE == "stretch" ]; then
+  sudo lxc-attach -n "$NAME" -- apt install sudo
+
 # Install python2.7 in container
 echo "Installing Python2.7 in container $NAME"
 sudo lxc-attach -n "$NAME" -- sudo apt update
