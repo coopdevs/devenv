@@ -10,9 +10,6 @@ set -e
 source "$PWD/.devenv"
 
 # Defaults
-project_uid=1000
-project_gid=1000
-
 RETRIES=5
 
 # Create LXC config file
@@ -126,7 +123,7 @@ fi
 
 # User management
 # If DEVENV_USER or DEVENV_GROUP is not set, the defaults user is not deleted.
-if [ -v DEVENV_USER ] || [ -v DEVENV_GROUP ]; then
+if [ -v DEVENV_USER ] && [ -v DEVENV_GROUP ] && [ -v project_uid ] && [ -v project_gid ]; then
   # Delete existing user with same uid and gid of project directory
   existing_user=$(sudo lxc-attach -n "$NAME" -- id -nu "$project_uid" 2>&1)
   sudo lxc-attach -n "$NAME" -- /usr/sbin/userdel -r "$existing_user"
