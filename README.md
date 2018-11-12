@@ -43,8 +43,8 @@ The script will:
 * Create a container
 * Mount your project directory into container in `/<BASE_PATH>/<PROJECT_NAME>`
 * Add container IP to `/etc/hosts`
-* Create a group with same `gid` of project directory and named `$DEVENV_GROUP` if `DEVENV_GROUP` or `DEVENV_USER` are defined.
-* Create a user with same `uid` and `gid` of project directory and named `$DEVENV_USER` if `DEVENV_GROUP` or `DEVENV_USER` are defined.
+* Create a group with same `gid` of project directory and named `$DEVENV_GROUP` if `DEVENV_GROUP` and `DEVENV_USER` are defined.
+* Create a user with same `uid` and `gid` of project directory and named `$DEVENV_USER` if `DEVENV_GROUP` and `DEVENV_USER` are defined.
 * Add system user's SSH public key to user
 * Install python2.7 in container
 
