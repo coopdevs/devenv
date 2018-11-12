@@ -9,6 +9,10 @@ set -e
 # shellcheck source=/dev/null
 source "$PWD/.devenv"
 
+# Defaults
+project_uid=1000
+project_gid=1000
+
 RETRIES=5
 
 # Create LXC config file
@@ -21,8 +25,18 @@ lxc.net.0.flags = up
 lxc.net.0.link = lxcbr0
 
 # Volumes
-lxc.mount.entry = $PROJECT_PATH /var/lib/lxc/$NAME/rootfs/$BASE_PATH/$PROJECT_NAME none bind,create=dir 0.0
 EOL
+
+# TODO - We can extract all this conditions in functions and separate in files
+# Mount folder if PROJECT_PATH is defined
+if [ ! -v BASE_PATH ] ; then
+  BASE_PATH="/opt"
+fi
+
+if [ -v PROJECT_PATH ] ; then
+  mount_entry="lxc.mount.entry = $PROJECT_PATH /var/lib/lxc/$NAME/rootfs$BASE_PATH/$PROJECT_NAME none bind,create=dir 0.0"
+  echo "$mount_entry" >> "$LXC_CONFIG"
+fi
 
 # Print configuration
 echo "* CONFIGURATION:"
@@ -98,13 +112,16 @@ read -r ssh_key < "$ssh_path"
 echo "Copying system user's SSH public key to 'root' user in container"
 sudo lxc-attach -n "$NAME" -- /bin/bash -c "/bin/mkdir -p /root/.ssh && echo $ssh_key > /root/.ssh/authorized_keys"
 
-# Find `uid` of project directory
-project_user=$(stat -c '%U' "$PROJECT_PATH")
-project_uid=$(id -u "$project_user")
+# If PROJECT_PATH is not set, use the defaults project_uid and project_gid
+if  [ -v PROJECT_PATH ] ; then
+  # Find `uid` of project directory
+  project_user=$(stat -c '%U' "$PROJECT_PATH")
+  project_uid=$(id -u "$project_user")
 
-# Find `gid` of project directory
-project_group=$(stat -c '%G' "$PROJECT_PATH")
-project_gid=$(id -g "$project_group")
+  # Find `gid` of project directory
+  project_group=$(stat -c '%G' "$PROJECT_PATH")
+  project_gid=$(id -g "$project_group")
+fi
 
 # Delete existing user with same uid and gid of project directory
 existing_user=$(sudo lxc-attach -n "$NAME" -- id -nu "$project_uid" 2>&1)
