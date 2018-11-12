@@ -44,7 +44,7 @@ echo "  - LXC Configuration: $LXC_CONFIG"
 echo "  - Host: $HOST"
 echo "  - Project Name: $PROJECT_NAME"
 echo "  - Project Directory: $PROJECT_PATH"
-echo "  - Will mount on: $BASE_PATH$PROJECT_NAME"
+echo "  - Will mount on: $BASE_PATH/$PROJECT_NAME"
 echo "  - User: $DEVENV_USER"
 echo "  - Group: $DEVENV_GROUP"
 echo
@@ -110,7 +110,6 @@ echo "Copying system user's SSH public key to 'root' user in container"
 sudo lxc-attach -n "$NAME" -- /bin/bash -c "/bin/mkdir -p /root/.ssh && echo $ssh_key > /root/.ssh/authorized_keys"
 
 # User management related with projects folder
-# If PROJECT_PATH is not set, use the defaults project_uid and project_gid
 if  [ -v PROJECT_PATH ] ; then
   # Find `uid` of project directory
   project_user=$(stat -c '%U' "$PROJECT_PATH")
@@ -122,7 +121,6 @@ if  [ -v PROJECT_PATH ] ; then
 fi
 
 # User management
-# If DEVENV_USER or DEVENV_GROUP is not set, the defaults user is not deleted.
 if [ -v DEVENV_USER ] && [ -v DEVENV_GROUP ] && [ -v project_uid ] && [ -v project_gid ]; then
   # Delete existing user with same uid and gid of project directory
   existing_user=$(sudo lxc-attach -n "$NAME" -- id -nu "$project_uid" 2>&1)
