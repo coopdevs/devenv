@@ -10,9 +10,6 @@ set -e
 source "$PWD/.devenv"
 
 # Defaults
-project_uid=1000
-project_gid=1000
-
 RETRIES=5
 
 # Create LXC config file
@@ -28,11 +25,11 @@ lxc.net.0.link = lxcbr0
 EOL
 
 # TODO - We can extract all this conditions in functions and separate in files
-# Mount folder if PROJECT_PATH is defined
 if [ ! -v BASE_PATH ] ; then
   BASE_PATH="/opt"
 fi
 
+# Mount folder if PROJECT_PATH is defined
 if [ -v PROJECT_PATH ] ; then
   mount_entry="lxc.mount.entry = $PROJECT_PATH /var/lib/lxc/$NAME/rootfs$BASE_PATH/$PROJECT_NAME none bind,create=dir 0.0"
   echo "$mount_entry" >> "$LXC_CONFIG"
@@ -112,7 +109,7 @@ read -r ssh_key < "$ssh_path"
 echo "Copying system user's SSH public key to 'root' user in container"
 sudo lxc-attach -n "$NAME" -- /bin/bash -c "/bin/mkdir -p /root/.ssh && echo $ssh_key > /root/.ssh/authorized_keys"
 
-# If PROJECT_PATH is not set, use the defaults project_uid and project_gid
+# User management related with projects folder
 if  [ -v PROJECT_PATH ] ; then
   # Find `uid` of project directory
   project_user=$(stat -c '%U' "$PROJECT_PATH")
@@ -123,19 +120,22 @@ if  [ -v PROJECT_PATH ] ; then
   project_gid=$(id -g "$project_group")
 fi
 
-# Delete existing user with same uid and gid of project directory
-existing_user=$(sudo lxc-attach -n "$NAME" -- id -nu "$project_uid" 2>&1)
-sudo lxc-attach -n "$NAME" -- /usr/sbin/userdel -r "$existing_user"
+# User management
+if [ -v DEVENV_USER ] && [ -v DEVENV_GROUP ] && [ -v project_uid ] && [ -v project_gid ]; then
+  # Delete existing user with same uid and gid of project directory
+  existing_user=$(sudo lxc-attach -n "$NAME" -- id -nu "$project_uid" 2>&1)
+  sudo lxc-attach -n "$NAME" -- /usr/sbin/userdel -r "$existing_user"
 
-# Create group with same `gid` of project directory
-sudo lxc-attach -n "$NAME" -- /usr/sbin/groupadd -f --gid "$project_gid" "$DEVENV_GROUP"
+  # Create group with same `gid` of project directory
+  sudo lxc-attach -n "$NAME" -- /usr/sbin/groupadd -f --gid "$project_gid" "$DEVENV_GROUP"
 
-# Create user with same `uid` and `gid` of project directory
-sudo lxc-attach -n "$NAME" -- /bin/sh -c "/usr/bin/id -u $DEVENV_USER || /usr/sbin/useradd --uid $project_uid --gid $project_gid --create-home --shell /bin/bash $DEVENV_USER"
+  # Create user with same `uid` and `gid` of project directory
+  sudo lxc-attach -n "$NAME" -- /bin/sh -c "/usr/bin/id -u $DEVENV_USER || /usr/sbin/useradd --uid $project_uid --gid $project_gid --create-home --shell /bin/bash $DEVENV_USER"
 
-# Add system user's SSH public key to user
-echo "Copying system user's SSH public key to $DEVENV_USER user in container"
-sudo lxc-attach -n "$NAME" -- sudo -u "$DEVENV_USER" -- sh -c "/bin/mkdir -p /home/$DEVENV_USER/.ssh && echo $ssh_key > /home/$DEVENV_USER/.ssh/authorized_keys"
+  # Add system user's SSH public key to user
+  echo "Copying system user's SSH public key to $DEVENV_USER user in container"
+  sudo lxc-attach -n "$NAME" -- sudo -u "$DEVENV_USER" -- sh -c "/bin/mkdir -p /home/$DEVENV_USER/.ssh && echo $ssh_key > /home/$DEVENV_USER/.ssh/authorized_keys"
+fi
 
 # Debian Stretch Sudo install
 sudo lxc-attach -n "$NAME" -- apt install sudo
