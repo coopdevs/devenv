@@ -25,13 +25,18 @@ DISTRIBUTION="<SO distribution>"
 RELEASE="<SO release>"
 ARCH="<SO arch>"
 HOST="local.$NAME.coop"
-DEVENV_USER="<user that will own the project>" -- Optional
-DEVENV_GROUP="<group that will own the project>" -- Optional
+
+# Optional -- To create a new user and group
+DEVENV_USER="<user that will own the project>"
+DEVENV_GROUP="<group that will own the project>"
 
 # Optional -- To mount a project
 PROJECT_NAME="<project name>"
 PROJECT_PATH="${PWD%/*}/$PROJECT_NAME"
-BASE_PATH="/opt"
+BASE_PATH="<base project path>"
+
+# Optional -- To install Python2.7 interpeter
+PYTHON2=yes
 ```
 
 Then run `devenv` in your project directory.
