@@ -140,12 +140,10 @@ fi
 # Debian Stretch Sudo install
 sudo lxc-attach -n "$NAME" -- apt install sudo
 
-if [ -v PYTHON2 ]; then
-  # Install python2.7 in container
-  echo "Installing Python2.7 in container $NAME"
-  sudo lxc-attach -n "$NAME" -- sudo apt update
-  sudo lxc-attach -n "$NAME" -- sudo apt install -y python2.7
-fi
+# Install python interpreter in container
+echo "Installing Python in container $NAME"
+sudo lxc-attach -n "$NAME" -- sudo apt update
+sudo lxc-attach -n "$NAME" -- sudo apt install -y "$PYTHON_INTERPRETER"
 
 # Install SSH server in container
 echo "Installing SSH server in container $NAME"
