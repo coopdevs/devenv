@@ -25,13 +25,18 @@ DISTRIBUTION="<SO distribution>"
 RELEASE="<SO release>"
 ARCH="<SO arch>"
 HOST="local.$NAME.coop"
-DEVENV_USER="<user that will own the project>" -- Optional
-DEVENV_GROUP="<group that will own the project>" -- Optional
+
+# Optional -- To create a new user and group
+DEVENV_USER="<user that will own the project>"
+DEVENV_GROUP="<group that will own the project>"
 
 # Optional -- To mount a project
 PROJECT_NAME="<project name>"
 PROJECT_PATH="${PWD%/*}/$PROJECT_NAME"
-BASE_PATH="/opt"
+BASE_PATH="<base project path>"
+
+# Select the python interpeter python2.7 or python3
+PYTHON_INTERPRETER=python3
 ```
 
 Then run `devenv` in your project directory.
@@ -46,6 +51,6 @@ The script will:
 * Create a group with same `gid` of project directory and named `$DEVENV_GROUP` if `DEVENV_GROUP` and `DEVENV_USER` are defined.
 * Create a user with same `uid` and `gid` of project directory and named `$DEVENV_USER` if `DEVENV_GROUP` and `DEVENV_USER` are defined.
 * Add system user's SSH public key to user
-* Install python2.7 in container
+* Install python in container
 
 When the execution ends, you'll have a container ready to provision and deploy your project.
