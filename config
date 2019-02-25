@@ -1,0 +1,22 @@
+#!/bin/bash
+# shellcheck disable=SC2034
+# vim: set filetype=sh :
+
+# Configuration file for devenv command
+# This is sourced after project config,
+# so this can depend on it.
+
+# Number of times to retest if container is started and IP assigned
+# RETRIES=0 means 1 attempt and 0 retries.
+RETRIES=5
+
+# SSH certificate to log in to the SSH server inside the container
+SSH_KEY_PATH="$HOME/.ssh/id_rsa.pub"
+
+LXC_CONFIG_CONTENT="\
+# Network
+lxc.net.0.type = veth
+lxc.net.0.flags = up
+lxc.net.0.link = lxcbr0
+
+# Volumes"

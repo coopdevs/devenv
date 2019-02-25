@@ -5,24 +5,32 @@ set -e
 # Uncomment the following line to debug the script
 # set -x
 
-# Load configuration
-# shellcheck source=/dev/null
-source "$PWD/.devenv"
+function config_exists_or_exit {
+    CONFIG="$1"
+    if [ ! -f "$CONFIG" ]; then
+        echo "ERROR: needed config file \"$CONFIG\" does not exist."
+        exit 1
+    fi
+}
 
-# Defaults
-RETRIES=5
+PROJECT_CONFIG="$PWD/.devenv"
+config_file_exists_or_exit "$PROJECT_CONFIG"
+# Load project configuration
+# shellcheck source=/dev/null
+source "$PROJECT_CONFIG"
+
+# Load global defaults
+GLOBAL_CONFIG=/etc/devenv
+config_file_exists_or_exit "$GLOBAL_CONFIG"
+# shellcheck source=config
+source "$GLOBAL_CONFIG"
 
 # Create LXC config file
 LXC_CONFIG="/tmp/$DISTRIBUTION.$NAME.conf"
-echo "Creating config file: $LXC_CONFIG"
-cat > "$LXC_CONFIG" <<EOL
-# Network
-lxc.net.0.type = veth
-lxc.net.0.flags = up
-lxc.net.0.link = lxcbr0
+echo "$LXC_CONFIG_CONTENT" > "$LXC_CONFIG"
 
-# Volumes
-EOL
+# NOTE: bash >=4.2 supports this syntax:
+# `test -v varname` is True if the shell variable varname is set (has been assigned a value).
 
 # TODO - We can extract all this conditions in functions and separate in files
 if [ ! -v BASE_PATH ] ; then
@@ -50,50 +58,68 @@ echo "  - Group: $DEVENV_GROUP"
 echo
 
 # Create container
-exist_container="$(sudo lxc-ls --filter ^"$NAME"$)"
-if [ -z "${exist_container}" ] ; then
-  echo "Creating container $NAME"
+EXIST_CONTAINTER="$(sudo lxc-ls --filter ^"$NAME"$)"
+if [ -z "${EXIST_CONTAINTER}" ] ; then
+  echo "Creating container $NAME..."
   sudo lxc-create --name "$NAME" -f "$LXC_CONFIG" -t download -l INFO -- --dist "$DISTRIBUTION" --release "$RELEASE" --arch "$ARCH"
 fi
-echo "Container ready"
+echo "Container is created"
 
 # Check if container is running, if not start it
-count=1
-while [ $count -lt $RETRIES ] && [ -z "$is_running" ]; do
-  is_running=$(sudo lxc-ls --running --filter ^"$NAME"$)
-  if [ -z "$is_running" ] ; then
-    echo "Starting container"
-    sudo lxc-start -n "$NAME" -d -l INFO
-    ((count++))
+COUNT=1
+IS_RUNNING=$(sudo lxc-ls --running --filter ^"$NAME"$)
+
+while [ -z "$IS_RUNNING" ]; do
+  # LOOP START#
+  # If container is not running after $RETRIES +1 attempts, then stop execution
+  if [ "$COUNT" -le "$RETRIES" ]; then
+    echo "Container not started, something is wrong."
+    echo "Please check log file /var/log/lxc/$NAME.log"
+    exit 1
   fi
+
+  ((COUNT++))
+  sleep 2
+
+  # LOOP BODY #
+  echo "Starting container..."
+  sudo lxc-start -n "$NAME" -d -l INFO
+
+  # POST END #
+  IS_RUNNING=$(sudo lxc-ls --running --filter ^"$NAME"$)
 done
 
-# If container is not running stop execution
-if [ -z "$is_running" ]; then
-  echo "Container not started, something is wrong."
-  echo "Please check log file /var/log/lxc/$NAME.log"
-  exit 0
-fi
-echo "Container is running..."
+echo "Container is running"
 
 # Wait to start container and check the IP
-count=1
-ip_container="$(sudo lxc-info -n "$NAME" -iH)"
-while [ $count -lt $RETRIES ] && [ -z "$ip_container" ] ; do
+COUNT=1
+IP_CONTAINER="$(sudo lxc-info -n "$NAME" -iH)"
+while [ -z "$IP_CONTAINER" ] ; do
+  # LOOP START #
+  if [ "$COUNT" -le "$RETRIES" ]; then
+    echo "Container is started but has no IP address."
+    echo "Please check log file /var/log/lxc/$NAME.log"
+    exit 1
+  fi
+
+  ((COUNT++))
+  echo "Waiting for container IP address..."
   sleep 2
-  echo "Waiting for container IP..."
-  ip_container="$(sudo lxc-info -n "$NAME" -iH)"
-  ((count++))
+
+  # LOOP END #
+  IP_CONTAINER="$(sudo lxc-info -n "$NAME" -iH)"
 done
-echo "Container IP: $ip_container"
+echo "Container has IP address: $IP_CONTAINER"
 echo
 
 # Add container IP to /etc/hosts
 echo "Removing old host $HOST from /etc/hosts"
 sudo sed -i '/'"$HOST"'/d' /etc/hosts
-host_entry="$ip_container       $HOST"
-echo "Add '$host_entry' to /etc/hosts"
-sudo -- sh -c "echo $host_entry >> /etc/hosts"
+HOST_ENTRY="\
+# LXC container for $NAME
+$IP_CONTAINER       $HOST"
+echo "Add '$HOST_ENTRY' to /etc/hosts"
+sudo -- sh -c "echo $HOST_ENTRY >> /etc/hosts"
 echo
 
 # Remove host SSH key
@@ -101,40 +127,39 @@ echo "Removing old $HOST from ~/.ssh/know_hosts"
 ssh-keygen -R "$HOST"
 
 # Read user's SSH public key
-ssh_path="$HOME/.ssh/id_rsa.pub"
-echo "Reading SSH public key from ${ssh_path}"
-read -r ssh_key < "$ssh_path"
+echo "Reading SSH public key from ${SSH_KEY_PATH}"
+read -r SSH_KEY < "$SSH_KEY_PATH"
 
 # Add system user's SSH public key to `root` user
 echo "Copying system user's SSH public key to 'root' user in container"
-sudo lxc-attach -n "$NAME" -- /bin/bash -c "/bin/mkdir -p /root/.ssh && echo $ssh_key > /root/.ssh/authorized_keys"
+sudo lxc-attach -n "$NAME" -- /bin/bash -c "/bin/mkdir -p /root/.ssh && echo $SSH_KEY > /root/.ssh/authorized_keys"
 
 # User management related with projects folder
 if  [ -v PROJECT_PATH ] ; then
   # Find `uid` of project directory
-  project_user=$(stat -c '%U' "$PROJECT_PATH")
-  project_uid=$(id -u "$project_user")
+  PROJECT_USER=$(stat -c '%U' "$PROJECT_PATH")
+  PROJECT_UID=$(id -u "$PROJECT_USER")
 
   # Find `gid` of project directory
-  project_group=$(stat -c '%G' "$PROJECT_PATH")
-  project_gid=$(id -g "$project_group")
+  PROJECT_GROUP=$(stat -c '%G' "$PROJECT_PATH")
+  PROJECT_GID=$(id -g "$PROJECT_GROUP")
 fi
 
 # User management
-if [ -v DEVENV_USER ] && [ -v DEVENV_GROUP ] && [ -v project_uid ] && [ -v project_gid ]; then
+if [ -v DEVENV_USER ] && [ -v DEVENV_GROUP ] && [ -v PROJECT_UID ] && [ -v PROJECT_GID ]; then
   # Delete existing user with same uid and gid of project directory
-  existing_user=$(sudo lxc-attach -n "$NAME" -- id -nu "$project_uid" 2>&1)
+  existing_user=$(sudo lxc-attach -n "$NAME" -- id -nu "$PROJECT_UID" 2>&1)
   sudo lxc-attach -n "$NAME" -- /usr/sbin/userdel -r "$existing_user"
 
   # Create group with same `gid` of project directory
-  sudo lxc-attach -n "$NAME" -- /usr/sbin/groupadd -f --gid "$project_gid" "$DEVENV_GROUP"
+  sudo lxc-attach -n "$NAME" -- /usr/sbin/groupadd -f --gid "$PROJECT_GID" "$DEVENV_GROUP"
 
   # Create user with same `uid` and `gid` of project directory
-  sudo lxc-attach -n "$NAME" -- /bin/sh -c "/usr/bin/id -u $DEVENV_USER || /usr/sbin/useradd --uid $project_uid --gid $project_gid --create-home --shell /bin/bash $DEVENV_USER"
+  sudo lxc-attach -n "$NAME" -- /bin/sh -c "/usr/bin/id -u $DEVENV_USER || /usr/sbin/useradd --uid $PROJECT_UID --gid $PROJECT_GID --create-home --shell /bin/bash $DEVENV_USER"
 
   # Add system user's SSH public key to user
   echo "Copying system user's SSH public key to $DEVENV_USER user in container"
-  sudo lxc-attach -n "$NAME" -- sudo -u "$DEVENV_USER" -- sh -c "/bin/mkdir -p /home/$DEVENV_USER/.ssh && echo $ssh_key > /home/$DEVENV_USER/.ssh/authorized_keys"
+  sudo lxc-attach -n "$NAME" -- sudo -u "$DEVENV_USER" -- sh -c "/bin/mkdir -p /home/$DEVENV_USER/.ssh && echo $SSH_KEY > /home/$DEVENV_USER/.ssh/authorized_keys"
 fi
 
 # Debian Stretch Sudo install

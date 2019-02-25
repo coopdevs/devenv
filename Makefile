@@ -1,5 +1,10 @@
 install:
-	sudo ln -fs $(shell pwd)/create-container.sh /usr/sbin/devenv
+	cp create-container.sh /usr/sbin/devenv
+	cp config /etc/devenv
+
+uninstall:
+	rm create-container.sh /usr/sbin/devenv
+	rm config /etc/devenv
 
 all: install
 
