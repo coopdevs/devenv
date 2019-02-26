@@ -1,14 +1,17 @@
 # devenv
-A `bash` script to create and manage development environments using [LXC](https://linuxcontainers.org/) linux containers.
+A `bash` script to create and manage development environments using privileged [LXC](https://linuxcontainers.org/) linux containers.
 
 ## Requirements
 
 * LXC >= 2.1
 
 ## Install
-Run `make` to install the script in your system.
+Run `make install` with root privileges to install the script in your system.
+It will copy the executable script to `/usr/sbin/devenv` and its config to `/etc/devenv`
 
-The script will ask for `sudo` password to create a symlink in `/usr/sbin`.
+## Uninstall
+Run `make uninstall` with root privileges to remove both the config and executable from your system.
+Beware that if you have substituted any of those files by anything else, they will be removed regardless.
 
 ### Why in /usr/sbin?
 Please give a look at [Filesystem Hierarchy](https://jlk.fjfi.cvut.cz/arch/manpages/man/file-hierarchy.7).
