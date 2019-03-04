@@ -117,7 +117,7 @@ echo "Removing old host $HOST from /etc/hosts"
 sudo sed -i '/'"$HOST"'/d' /etc/hosts
 HOST_ENTRY_COMMENT="# LXC container for $NAME"
 HOST_ENTRY="$IP_CONTAINER        $HOST"
-echo "Add entry '$HOST_ENTRY_COMMENT' to /etc/hosts"
+echo "Add entry '$HOST_ENTRY' to /etc/hosts"
 sudo -- sh -c "echo \"$HOST_ENTRY_COMMENT\" >> /etc/hosts"
 sudo -- sh -c "echo \"$HOST_ENTRY\"         >> /etc/hosts"
 echo
