@@ -3,8 +3,8 @@ install:
 	cp config /etc/devenv
 
 uninstall:
-	rm create-container.sh /usr/sbin/devenv
-	rm config /etc/devenv
+	rm /usr/sbin/devenv
+	rm /etc/devenv
 
 all: install
 

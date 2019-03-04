@@ -9,6 +9,10 @@ A `bash` script to create and manage development environments using privileged [
 Run `make install` with root privileges to install the script in your system.
 It will copy the executable script to `/usr/sbin/devenv` and its config to `/etc/devenv`
 
+## Update
+If you are keeping a copy of this repo, do: `git pull && sudo make install`.
+If you have deleted, clone again this repo and then do `sudo make install`.
+
 ## Uninstall
 Run `make uninstall` with root privileges to remove both the config and executable from your system.
 Beware that if you have substituted any of those files by anything else, they will be removed regardless.

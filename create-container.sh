@@ -5,7 +5,7 @@ set -e
 # Uncomment the following line to debug the script
 # set -x
 
-function config_exists_or_exit {
+function config_file_exists_or_exit {
     CONFIG="$1"
     if [ ! -f "$CONFIG" ]; then
         echo "ERROR: needed config file \"$CONFIG\" does not exist."
@@ -14,13 +14,13 @@ function config_exists_or_exit {
 }
 
 PROJECT_CONFIG="$PWD/.devenv"
+echo "Loading project configuration from \"$PROJECT_CONFIG\""
 config_file_exists_or_exit "$PROJECT_CONFIG"
-# Load project configuration
 # shellcheck source=/dev/null
 source "$PROJECT_CONFIG"
 
-# Load global defaults
 GLOBAL_CONFIG=/etc/devenv
+echo "Loading system configuration from \"$GLOBAL_CONFIG\""
 config_file_exists_or_exit "$GLOBAL_CONFIG"
 # shellcheck source=config
 source "$GLOBAL_CONFIG"
@@ -96,7 +96,7 @@ COUNT=1
 IP_CONTAINER="$(sudo lxc-info -n "$NAME" -iH)"
 while [ -z "$IP_CONTAINER" ] ; do
   # LOOP START #
-  if [ "$COUNT" -le "$RETRIES" ]; then
+  if [ "$COUNT" -gt "$RETRIES" ]; then
     echo "Container is started but has no IP address."
     echo "Please check log file /var/log/lxc/$NAME.log"
     exit 1
@@ -115,11 +115,11 @@ echo
 # Add container IP to /etc/hosts
 echo "Removing old host $HOST from /etc/hosts"
 sudo sed -i '/'"$HOST"'/d' /etc/hosts
-HOST_ENTRY="\
-# LXC container for $NAME
-$IP_CONTAINER       $HOST"
-echo "Add '$HOST_ENTRY' to /etc/hosts"
-sudo -- sh -c "echo $HOST_ENTRY >> /etc/hosts"
+HOST_ENTRY_COMMENT="# LXC container for $NAME"
+HOST_ENTRY="$IP_CONTAINER        $HOST"
+echo "Add entry '$HOST_ENTRY_COMMENT' to /etc/hosts"
+sudo -- sh -c "echo \"$HOST_ENTRY_COMMENT\" >> /etc/hosts"
+sudo -- sh -c "echo \"$HOST_ENTRY\"         >> /etc/hosts"
 echo
 
 # Remove host SSH key
