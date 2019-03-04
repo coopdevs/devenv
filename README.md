@@ -3,7 +3,15 @@ A `bash` script to create and manage development environments using privileged [
 
 ## Requirements
 
-* LXC >= 2.1
+1. LXC >= 2.1
+2. Network bridge called `lxcbr0`
+
+_Notes_:
+
+1. **devenv** has been also tested with LXC version 2.0.7 with Debian Stretch. In order to work, one needs to adapt the network configuration using the old keys.
+2. In Ubuntu and Debian lxc gets installed along a systemd unit called `lxc-net`, configurable at `/etc/default/lxc-net`.
+
+See the [Debian lxc how-to](https://wiki.debian.org/LXC?action=recall&rev=179#Minimal_changes_networking_in_.2BIBw-stretch.2BIB0-) for both requirements.
 
 ## Install
 Run `make install` with root privileges to install the script in your system.
@@ -37,7 +45,9 @@ HOST="local.$NAME.coop"
 DEVENV_USER="<user that will own the project>"
 DEVENV_GROUP="<group that will own the project>"
 
-# Optional -- To mount a project
+# Optional -- To mount a project.
+# Make sure that the directory "../$PROJECT_NAME" exists
+# in the host machine before executing this script.
 PROJECT_NAME="<project name>"
 PROJECT_PATH="${PWD%/*}/$PROJECT_NAME"
 BASE_PATH="<base project path>"
