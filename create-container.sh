@@ -72,7 +72,7 @@ IS_RUNNING=$(sudo lxc-ls --running --filter ^"$NAME"$)
 while [ -z "$IS_RUNNING" ]; do
   # LOOP START#
   # If container is not running after $RETRIES +1 attempts, then stop execution
-  if [ "$COUNT" -le "$RETRIES" ]; then
+  if [ "$COUNT" -gt "$RETRIES" ]; then
     echo "Container not started, something is wrong."
     echo "Please check log file /var/log/lxc/$NAME.log"
     exit 1
