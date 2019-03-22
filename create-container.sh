@@ -113,11 +113,25 @@ echo "Container has IP address: $IP_CONTAINER"
 echo
 
 # Add container IP to /etc/hosts
-echo "Removing old host $HOST from /etc/hosts"
-sudo sed -i '/'"$HOST"'/d' /etc/hosts
 HOST_ENTRY_COMMENT="# LXC container for $NAME"
 HOST_ENTRY="$IP_CONTAINER        $HOST"
-echo "Add entry '$HOST_ENTRY' to /etc/hosts"
+
+echo "Removing old host $HOST from /etc/hosts"
+# When deleting it's critical to control the pattern, in this case,
+#+ with start (spaces) and end ('$' end of line), as a simple matching
+#+ against /$HOST/  could be harmful.
+#+ In this supposit, running devenv for odoo-1 would delete any entries
+#+ of odoo-12, and those of my-new-odoo-1.domain
+# Example:
+# NAME="Odoo 1"; HOST="odoo-1"
+# HOST_ENTRY_COMMENT="# LXC container for Odoo 1"
+# HOST_ENTRY="10.10.10.10        odoo-1"
+# echo "${HOST_ENTRY/$IP_CONTAINER/}" →  "        odoo-1"
+# See man bash(1) and search for 'Parameter Expansion'
+sudo sed -i "/${HOST_ENTRY/$IP_CONTAINER/}$/d" /etc/hosts
+sudo sed -i "/^$HOST_ENTRY_COMMENT$/d" /etc/hosts
+
+echo "Add entry '$HOST_ENTRY' with comments to /etc/hosts"
 sudo -- sh -c "echo \"$HOST_ENTRY_COMMENT\" >> /etc/hosts"
 sudo -- sh -c "echo \"$HOST_ENTRY\"         >> /etc/hosts"
 echo
