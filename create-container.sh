@@ -11,6 +11,7 @@ source "$PWD/.devenv"
 
 # Defaults
 RETRIES=5
+DEVENV_USER=${DEVENV_USER:-root}
 
 # Create LXC config file
 LXC_CONFIG="/tmp/$DISTRIBUTION.$NAME.conf"
@@ -150,6 +151,7 @@ echo "Installing SSH server in container $NAME"
 sudo lxc-attach -n "$NAME" -- sudo apt install -y openssh-server
 
 # Ready to provision the container
+echo
 echo "Very well! LXC container $NAME has been created and configured"
 echo
 echo "You should be able to access using:"
