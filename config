@@ -9,6 +9,7 @@
 # Number of times to retest if container is started and IP assigned
 # RETRIES=0 means 1 attempt and 0 retries.
 RETRIES=5
+DEVENV_USER=${DEVENV_USER:-root}
 
 # SSH certificate to log in to the SSH server inside the container
 SSH_KEY_PATH="$HOME/.ssh/id_rsa.pub"

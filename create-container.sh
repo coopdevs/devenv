@@ -189,6 +189,7 @@ echo "Installing SSH server in container $NAME"
 sudo lxc-attach -n "$NAME" -- sudo apt install -y openssh-server
 
 # Ready to provision the container
+echo
 echo "Very well! LXC container $NAME has been created and configured"
 echo
 echo "You should be able to access using:"
