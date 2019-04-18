@@ -163,11 +163,14 @@ if  [ -v PROJECT_PATH ] ; then
   PROJECT_GID=$(id -g "$PROJECT_GROUP")
 fi
 
+echo "$PROJECT_UID"
+
 # User management
 if [ -v DEVENV_USER ] && [ -v DEVENV_GROUP ] && [ -v PROJECT_UID ] && [ -v PROJECT_GID ]; then
   # Delete existing user with same uid and gid of project directory
-  existing_user=$(sudo lxc-attach -n "$NAME" -- id -nu "$PROJECT_UID" 2>&1)
-  sudo lxc-attach -n "$NAME" -- /usr/sbin/userdel -r "$existing_user"
+  # If the user does not exist ignore the assignment and deletion error
+  ! existing_user=$(sudo lxc-attach -n "$NAME" -- id -nu "$PROJECT_UID" 2>&1)
+  ! sudo lxc-attach -n "$NAME" -- /usr/sbin/userdel -r "$existing_user"
 
   # Create group with same `gid` of project directory
   sudo lxc-attach -n "$NAME" -- /usr/sbin/groupadd -f --gid "$PROJECT_GID" "$DEVENV_GROUP"
