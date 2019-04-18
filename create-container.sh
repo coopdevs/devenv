@@ -148,6 +148,10 @@ read -r SSH_KEY < "$SSH_KEY_PATH"
 echo "Copying system user's SSH public key to 'root' user in container"
 sudo lxc-attach -n "$NAME" -- /bin/bash -c "/bin/mkdir -p /root/.ssh && echo $SSH_KEY > /root/.ssh/authorized_keys"
 
+# Install sudo command
+# This command is not installed out of the box in Debian Stretch
+sudo lxc-attach -n "$NAME" -- apt install sudo
+
 # User management related with projects folder
 if  [ -v PROJECT_PATH ] ; then
   # Find `uid` of project directory
