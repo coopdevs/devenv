@@ -37,8 +37,9 @@ if [ ! -v BASE_PATH ] ; then
   BASE_PATH="/opt"
 fi
 
-# Mount folder if PROJECT_PATH is defined
+# If PROJECT_PATH is defined, create folder if non-existant, and mount it
 if [ -v PROJECT_PATH ] ; then
+  mkdir -p "$PROJECT_PATH"
   mount_entry="lxc.mount.entry = $PROJECT_PATH /var/lib/lxc/$NAME/rootfs$BASE_PATH/$PROJECT_NAME none bind,create=dir 0.0"
   echo "$mount_entry" >> "$LXC_CONFIG"
 fi
