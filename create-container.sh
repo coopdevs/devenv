@@ -37,8 +37,16 @@ if [ ! -v BASE_PATH ] ; then
   BASE_PATH="/opt"
 fi
 
-# Mount folder if PROJECT_PATH is defined
-if [ -v PROJECT_PATH ] ; then
+# About PROJECT_PATH:
+# If it is not set, skip this section
+if [ ! -v PROJECT_PATH ] ; then
+  echo "PROJECT_PATH is undefined, will not mount a host-container shared directory"
+# If defined but does not exists, exit with an error
+elif [ ! -d "$PROJECT_PATH" ]; then
+  echo "Shared directory \"$PROJECT_PATH\" does not exist. Create it or unset variable \$PROJECT_PATH"
+  exit 1
+# Otherwise, we've got what we need. Configure the container to mount the shared dir.
+else
   mount_entry="lxc.mount.entry = $PROJECT_PATH /var/lib/lxc/$NAME/rootfs$BASE_PATH/$PROJECT_NAME none bind,create=dir 0.0"
   echo "$mount_entry" >> "$LXC_CONFIG"
 fi
