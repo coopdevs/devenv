@@ -5,15 +5,63 @@ set -e
 # Uncomment the following line to debug the script
 # set -x
 
+function init {
+    CONFIG="$1"
+    if [ -f "$CONFIG" ]; then
+      printf "The devenv config file already exists. Execute:\n\n$ cat .devenv\n"
+      exit 1
+    else
+      cat > "${CONFIG}" << EOF
+# File created with devenv init command
+
+NAME="<container name>"
+DISTRIBUTION="<SO distribution>"
+RELEASE="<SO release>"
+ARCH="<SO arch>"
+HOST="local.$NAME.coop"
+
+# Optional -- To create a new user and group
+DEVENV_USER="<user that will own the project>"
+DEVENV_GROUP="<group that will own the project>"
+
+# Optional -- To mount a project.
+# Make sure that the directory "../$PROJECT_NAME" exists
+# in the host machine before executing this script.
+PROJECT_NAME="<project name>"
+PROJECT_PATH="${PWD%/*}/$PROJECT_NAME"
+BASE_PATH="<base project path>"
+
+# Select the python interpeter python2.7 or python3
+PYTHON_INTERPRETER=python3
+EOF
+      echo "Default devenv config file created!"
+    fi
+}
+
 function config_file_exists_or_exit {
     CONFIG="$1"
     if [ ! -f "$CONFIG" ]; then
         echo "ERROR: needed config file \"$CONFIG\" does not exist."
+        echo "Run devenv init to generate the config file \"$CONFIG\"."
         exit 1
     fi
 }
 
 PROJECT_CONFIG="$PWD/.devenv"
+
+# -----
+# devenv CLI
+# init - create a default config file
+# -----
+if [ -n "$1" ] && [ "$1" == "init" ]; then
+  case "$1" in
+    "init")
+      init "$PROJECT_CONFIG"
+      exit 0
+      ;;
+  esac
+fi
+
 echo "Loading project configuration from \"$PROJECT_CONFIG\""
 config_file_exists_or_exit "$PROJECT_CONFIG"
 # shellcheck source=/dev/null

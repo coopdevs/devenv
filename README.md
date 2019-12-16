@@ -30,7 +30,7 @@ Please give a look at [Filesystem Hierarchy](https://jlk.fjfi.cvut.cz/arch/manpa
 
 ## Execution
 
-To run the `devenv` script you need to create a `.devenv` configuration file in your project directory containing the following variables:
+To run the `devenv` script you need to create a `.devenv` configuration file in your project directory. You can run the `init` command to generate it containing the following variables:
 
 ```
 # <PROJECT_PATH>/.devenv file
