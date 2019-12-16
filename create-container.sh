@@ -5,6 +5,20 @@ set -e
 # Uncomment the following line to debug the script
 # set -x
 
+function print_help {
+    echo """
+    Usage: devenv [subcommand]
+
+A bash script to create and manage development environments using privileged LXC linux containers.
+
+Subcommands:
+    init - Generate the default configuration file. Create the .devenv
+
+
+More info: https://github.com/coopdevs/devenv
+    """
+}
+
 function init {
     CONFIG="$1"
     if [ -f "$CONFIG" ]; then
@@ -53,11 +67,15 @@ PROJECT_CONFIG="$PWD/.devenv"
 # devenv CLI
 # init - create a default config file
 # -----
-if [ -n "$1" ] && [ "$1" == "init" ]; then
+if [ -n "$1" ]; then
   case "$1" in
     "init")
       init "$PROJECT_CONFIG"
       exit 0
+      ;;
+    *)
+      print_help
+      exit 2
       ;;
   esac
 fi
