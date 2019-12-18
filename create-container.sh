@@ -12,7 +12,7 @@ function print_help {
 A bash script to create and manage development environments using privileged LXC linux containers.
 
 Subcommands:
-    init - Generate the default configuration file. Create the .devenv
+    init - Generate in the current dir a default configuration file, named .devenv
 
 
 More info: https://github.com/coopdevs/devenv
