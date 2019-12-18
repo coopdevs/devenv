@@ -29,10 +29,10 @@ function init {
 # File created with devenv init command
 
 NAME="<container name>"
-DISTRIBUTION="<SO distribution>"
-RELEASE="<SO release>"
-ARCH="<SO arch>"
-HOST="local.$NAME.coop"
+DISTRIBUTION="ubuntu"
+RELEASE="bionic"
+ARCH="amd64"
+HOST="$NAME.local"
 
 # Optional -- To create a new user and group
 DEVENV_USER="<user that will own the project>"
