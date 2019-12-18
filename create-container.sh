@@ -5,15 +5,84 @@ set -e
 # Uncomment the following line to debug the script
 # set -x
 
+function print_help {
+    echo """
+    Usage: devenv [subcommand]
+
+A bash script to create and manage development environments using privileged LXC linux containers.
+
+Subcommands:
+    init - Generate in the current dir a default configuration file, named .devenv
+
+
+More info: https://github.com/coopdevs/devenv
+    """
+}
+
+function init {
+    CONFIG="$1"
+    if [ -f "$CONFIG" ]; then
+      printf "The devenv config file already exists. Execute:\n\n$ cat .devenv\n"
+      exit 1
+    else
+      cat > "${CONFIG}" << EOF
+# File created with devenv init command
+
+NAME="<container name>"
+DISTRIBUTION="ubuntu"
+RELEASE="bionic"
+ARCH="amd64"
+HOST="$NAME.local"
+
+# Optional -- To create a new user and group
+DEVENV_USER="<user that will own the project>"
+DEVENV_GROUP="<group that will own the project>"
+
+# Optional -- To mount a project.
+# If you don't need a shared dir between host and guest, just
+# comment the lines or unset them. Empty string doesn't work.
+# Otherwise, if you need the shared mount, set the vars below and
+# make sure that the directory "../$PROJECT_NAME" exists
+# in the host machine before executing this script.
+PROJECT_NAME="<project name>"
+PROJECT_PATH="${PWD%/*}/$PROJECT_NAME"
+BASE_PATH="<base project path>"
+
+# Select the python interpeter python2.7 or python3
+PYTHON_INTERPRETER=python3
+EOF
+      echo "Default devenv config file created!"
+    fi
+}
+
 function config_file_exists_or_exit {
     CONFIG="$1"
     if [ ! -f "$CONFIG" ]; then
         echo "ERROR: needed config file \"$CONFIG\" does not exist."
+        echo "Run devenv init to generate the config file \"$CONFIG\"."
         exit 1
     fi
 }
 
 PROJECT_CONFIG="$PWD/.devenv"
+
+# -----
+# devenv CLI
+# init - create a default config file
+# -----
+if [ -n "$1" ]; then
+  case "$1" in
+    "init")
+      init "$PROJECT_CONFIG"
+      exit 0
+      ;;
+    *)
+      print_help
+      exit 2
+      ;;
+  esac
+fi
+
 echo "Loading project configuration from \"$PROJECT_CONFIG\""
 config_file_exists_or_exit "$PROJECT_CONFIG"
 # shellcheck source=/dev/null
