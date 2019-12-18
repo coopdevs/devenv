@@ -39,7 +39,10 @@ DEVENV_USER="<user that will own the project>"
 DEVENV_GROUP="<group that will own the project>"
 
 # Optional -- To mount a project.
-# Make sure that the directory "../$PROJECT_NAME" exists
+# If you don't need a shared dir between host and guest, just
+# comment the lines or unset them. Empty string doesn't work.
+# Otherwise, if you need the shared mount, set the vars below and
+# make sure that the directory "../$PROJECT_NAME" exists
 # in the host machine before executing this script.
 PROJECT_NAME="<project name>"
 PROJECT_PATH="${PWD%/*}/$PROJECT_NAME"
