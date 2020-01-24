@@ -260,9 +260,6 @@ if [ -v DEVENV_USER ] && [ -v DEVENV_GROUP ] && [ -v PROJECT_UID ] && [ -v PROJE
   sudo lxc-attach -n "$NAME" -- sudo -u "$DEVENV_USER" -- sh -c "/bin/mkdir -p /home/$DEVENV_USER/.ssh && echo $SSH_KEY > /home/$DEVENV_USER/.ssh/authorized_keys"
 fi
 
-# Debian Stretch Sudo install
-sudo lxc-attach -n "$NAME" -- apt install sudo
-
 # Install python interpreter in container
 echo "Installing Python in container $NAME"
 sudo lxc-attach -n "$NAME" -- sudo apt update
