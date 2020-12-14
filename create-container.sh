@@ -106,6 +106,16 @@ if [ ! -v BASE_PATH ] ; then
   BASE_PATH="/opt"
 fi
 
+# Test if known_hosts file exists
+if [ ! -f ~/.ssh/know_hosts ] ; then
+  touch ~/.ssh/know_hosts
+fi
+
+# Test if public key created
+if [ ! -f ~/.ssh/id_rsa.pub ] ; then
+  ssh-keygen -t rsa -N "" -q -f "$HOME/.ssh/id_rsa"
+fi
+
 # About PROJECT_PATH:
 # If it is not set, skip this section
 if [ ! -v PROJECT_PATH ] ; then
