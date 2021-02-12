@@ -108,7 +108,7 @@ fi
 
 # Test if known_hosts file exists
 if [ ! -f ~/.ssh/know_hosts ] ; then
-  touch ~/.ssh/know_hosts
+  touch ~/.ssh/known_hosts
 fi
 
 # Test if public key created
