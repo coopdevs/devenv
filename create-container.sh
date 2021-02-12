@@ -107,7 +107,7 @@ if [ ! -v BASE_PATH ] ; then
 fi
 
 # Test if known_hosts file exists
-if [ ! -f ~/.ssh/know_hosts ] ; then
+if [ ! -f ~/.ssh/known_hosts ] ; then
   touch ~/.ssh/known_hosts
 fi
 
