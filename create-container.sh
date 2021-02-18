@@ -132,13 +132,17 @@ else
   echo "$mount_entry" >> "$LXC_CONFIG"
 fi
 
+if [ -z "${HOSTS}" ] ; then
+  HOSTS=$HOST;
+fi
+
 # Print configuration
 echo "* CONFIGURATION:"
 echo "  - Name: $NAME"
 echo "  - Distribution: $DISTRIBUTION"
 echo "  - Release: $RELEASE"
 echo "  - LXC Configuration: $LXC_CONFIG"
-echo "  - Host: $HOST"
+echo "  - Hosts: $HOSTS"
 echo "  - Project Name: $PROJECT_NAME"
 echo "  - Project Directory: $PROJECT_PATH"
 echo "  - Will mount on: $BASE_PATH/$PROJECT_NAME"
@@ -202,32 +206,28 @@ echo "Container has IP address: $IP_CONTAINER"
 echo
 
 # Add container IP to /etc/hosts
+
 HOST_ENTRY_COMMENT="# LXC container for $NAME"
-HOST_ENTRY="$IP_CONTAINER        $HOST"
-
-echo "Removing old host $HOST from /etc/hosts"
-# When deleting it's critical to control the pattern, in this case,
-#+ with start (spaces) and end ('$' end of line), as a simple matching
-#+ against /$HOST/  could be harmful.
-#+ In this supposit, running devenv for odoo-1 would delete any entries
-#+ of odoo-12, and those of my-new-odoo-1.domain
-# Example:
-# NAME="Odoo 1"; HOST="odoo-1"
-# HOST_ENTRY_COMMENT="# LXC container for Odoo 1"
-# HOST_ENTRY="10.10.10.10        odoo-1"
-# echo "${HOST_ENTRY/$IP_CONTAINER/}" →  "        odoo-1"
-# See man bash(1) and search for 'Parameter Expansion'
-sudo sed -i "/${HOST_ENTRY/$IP_CONTAINER/}$/d" /etc/hosts
 sudo sed -i "/^$HOST_ENTRY_COMMENT$/d" /etc/hosts
-
-echo "Add entry '$HOST_ENTRY' with comments to /etc/hosts"
 sudo -- sh -c "echo \"$HOST_ENTRY_COMMENT\" >> /etc/hosts"
-sudo -- sh -c "echo \"$HOST_ENTRY\"         >> /etc/hosts"
-echo
 
-# Remove host SSH key
-echo "Removing old $HOST from ~/.ssh/know_hosts"
-ssh-keygen -R "$HOST"
+for HOST in $HOSTS; do
+  HOST_ENTRY="$IP_CONTAINER        $HOST"
+  echo "Removing old host $HOST from /etc/hosts"
+  sudo sed -i "/$HOST_ENTRY/d" /etc/hosts
+  sudo sed -i "/$IP_CONTAINER/d" /etc/hosts
+done
+
+for HOST in $HOSTS; do
+  HOST_ENTRY="$IP_CONTAINER        $HOST"
+  echo "Add entry '$HOST_ENTRY' to /etc/hosts"
+  sudo -- sh -c "echo \"$HOST_ENTRY\"         >> /etc/hosts"
+  echo
+
+  # Remove host SSH key
+  echo "Removing old $HOST from ~/.ssh/known_hosts"
+  ssh-keygen -R "$HOST"
+done
 
 # Read user's SSH public key
 echo "Reading SSH public key from ${SSH_KEY_PATH}"
