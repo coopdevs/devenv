@@ -113,7 +113,9 @@ fi
 
 # Test if public key created
 if [ ! -f ~/.ssh/id_rsa.pub ] ; then
-  ssh-keygen -t rsa -N "" -q -f "$HOME/.ssh/id_rsa"
+  echo "I can't find a SSH public key in the default path: `$HOME/.ssh/id_rsa`."
+  echo "You can use the var SSH_KEY_PATH to set a different path if you don't use the default."
+  exit 0
 fi
 
 # About PROJECT_PATH:
