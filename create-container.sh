@@ -150,6 +150,9 @@ echo "  - User: $DEVENV_USER"
 echo "  - Group: $DEVENV_GROUP"
 echo
 
+# Ensure that logging directory exists (needed in Debian 10)
+sudo mkdir -p /var/log/lxc
+
 # Create container
 EXIST_CONTAINTER="$(sudo lxc-ls --filter ^"$NAME"$)"
 if [ -z "${EXIST_CONTAINTER}" ] ; then
