@@ -214,8 +214,8 @@ sudo -- sh -c "echo \"$HOST_ENTRY_COMMENT\" >> /etc/hosts"
 for HOST in $HOSTS; do
   HOST_ENTRY="$IP_CONTAINER        $HOST"
   echo "Removing old host $HOST from /etc/hosts"
-  sudo sed -i "/$HOST_ENTRY/d" /etc/hosts
-  sudo sed -i "/$IP_CONTAINER/d" /etc/hosts
+  sudo sed -i "/^$HOST_ENTRY$/d" /etc/hosts
+  sudo sed -i "/^$IP_CONTAINER /d" /etc/hosts
 done
 
 for HOST in $HOSTS; do
