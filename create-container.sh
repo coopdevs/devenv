@@ -112,10 +112,10 @@ if [ ! -f ~/.ssh/known_hosts ] ; then
 fi
 
 # Test if public key created
-if [ ! -f ~/.ssh/id_rsa.pub ] ; then
-  echo "I can't find a SSH public key in the default path: `$HOME/.ssh/id_rsa`."
+if [ ! -f "$SSH_KEY_PATH" ] ; then
+  echo "I can't find a SSH public key in the specified or default path: $SSH_KEY_PATH"
   echo "You can use the var SSH_KEY_PATH to set a different path if you don't use the default."
-  exit 0
+  exit 1
 fi
 
 # About PROJECT_PATH:
@@ -149,6 +149,9 @@ echo "  - Will mount on: $BASE_PATH/$PROJECT_NAME"
 echo "  - User: $DEVENV_USER"
 echo "  - Group: $DEVENV_GROUP"
 echo
+
+# Ensure that logging directory exists (needed in Debian 10)
+sudo mkdir -p /var/log/lxc
 
 # Create container
 EXIST_CONTAINTER="$(sudo lxc-ls --filter ^"$NAME"$)"
