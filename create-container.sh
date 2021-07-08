@@ -132,6 +132,18 @@ else
   echo "$mount_entry" >> "$LXC_CONFIG"
 fi
 
+if [ -v ADDITIONAL_MOUNT_POINTS ] ; then
+  for ADDITIONAL_MOUNT_POINT in "${ADDITIONAL_MOUNT_POINTS[@]}"
+  do
+    IFS=";" read -r -a arr <<< "${ADDITIONAL_MOUNT_POINT}"
+    ADDITIONAL_PROJECT_NAME="${arr[0]}"
+    ADDITIONAL_PROJECT_PATH="${arr[1]}"
+    ADDITIONAL_BASE_PATH="${arr[2]}"
+    additional_mount_entry="lxc.mount.entry = $ADDITIONAL_PROJECT_PATH /var/lib/lxc/$NAME/rootfs$ADDITIONAL_BASE_PATH/$ADDITIONAL_PROJECT_NAME none bind,create=dir 0.0"
+    echo "$additional_mount_entry" #>> "$LXC_CONFIG"
+  done
+fi
+
 if [ -z "${HOSTS}" ] ; then
   HOSTS=$HOST;
 fi
