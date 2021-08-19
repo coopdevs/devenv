@@ -44,4 +44,9 @@ lxc.net.0.flags = up
 lxc.net.0.link = lxcbr0
 lxc.net.0.hwaddr = $MAC_ADDR
 
+# For docker
+lxc.apparmor.profile = unconfined
+lxc.cgroup.devices.allow = a
+lxc.cap.drop =
+
 # Volumes"
