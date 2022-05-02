@@ -83,16 +83,16 @@ if [ -n "$1" ]; then
   esac
 fi
 
-echo "Loading project configuration from \"$PROJECT_CONFIG\""
-config_file_exists_or_exit "$PROJECT_CONFIG"
-# shellcheck source=/dev/null
-source "$PROJECT_CONFIG"
-
 GLOBAL_CONFIG=/etc/devenv
 echo "Loading system configuration from \"$GLOBAL_CONFIG\""
 config_file_exists_or_exit "$GLOBAL_CONFIG"
 # shellcheck source=config
 source "$GLOBAL_CONFIG"
+
+echo "Loading project configuration from \"$PROJECT_CONFIG\""
+config_file_exists_or_exit "$PROJECT_CONFIG"
+# shellcheck source=/dev/null
+source "$PROJECT_CONFIG"
 
 # Create LXC config file
 LXC_CONFIG="/tmp/$DISTRIBUTION.$NAME.conf"
