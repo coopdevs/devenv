@@ -132,6 +132,13 @@ else
   echo "$mount_entry" >> "$LXC_CONFIG"
 fi
 
+# Mounting other project paths
+for other_project_path in "${OTHER_PROJECTS_PATHS[@]}"; do
+  other_project_name=$(basename "$other_project_path")
+  mount_entry="lxc.mount.entry = "$other_project_path" /var/lib/lxc/$NAME/rootfs$BASE_PATH/$other_project_name none bind,create=dir 0.0"
+  echo "$mount_entry" >> "$LXC_CONFIG"
+done
+
 if [ -z "${HOSTS}" ] ; then
   HOSTS=$HOST;
 fi
