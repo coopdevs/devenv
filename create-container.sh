@@ -105,6 +105,9 @@ echo "$LXC_CONFIG_CONTENT" > "$LXC_CONFIG"
 if [ ! -v BASE_PATH ] ; then
   BASE_PATH="/opt"
 fi
+if [ ! -v PROJECT_POST_PATH ] ; then
+  PROJECT_POST_PATH=""
+fi
 
 # Test if known_hosts file exists
 if [ ! -f ~/.ssh/known_hosts ] ; then
@@ -128,7 +131,7 @@ elif [ ! -d "$PROJECT_PATH" ]; then
   exit 1
 # Otherwise, we've got what we need. Configure the container to mount the shared dir.
 else
-  mount_entry="lxc.mount.entry = $PROJECT_PATH /var/lib/lxc/$NAME/rootfs$BASE_PATH/$PROJECT_NAME none bind,create=dir 0.0"
+  mount_entry="lxc.mount.entry = $PROJECT_PATH /var/lib/lxc/$NAME/rootfs$BASE_PATH/$PROJECT_NAME/$PROJECT_POST_PATH none bind,create=dir 0.0"
   echo "$mount_entry" >> "$LXC_CONFIG"
 fi
 

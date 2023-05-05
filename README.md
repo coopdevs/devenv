@@ -51,6 +51,7 @@ DEVENV_GROUP="<group that will own the project>"
 PROJECT_NAME="<project name>"
 PROJECT_PATH="${PWD%/*}/$PROJECT_NAME"
 BASE_PATH="<base project path>"
+PROJECT_POST_PATH="<post project path>"
 
 # Select the python interpeter python2.7 or python3
 PYTHON_INTERPRETER=python3
@@ -63,7 +64,7 @@ Then run `devenv` in your project directory.
 The script will:
 
 * Create a container
-* Mount your project directory into container in `/<BASE_PATH>/<PROJECT_NAME>`
+* Mount your project directory into container in `/<BASE_PATH>/<PROJECT_NAME>/<PROJECT_POST_PATH>`
 * Add container IP to `/etc/hosts`
 * Create a group with same `gid` of project directory and named `$DEVENV_GROUP` if `DEVENV_GROUP` and `DEVENV_USER` are defined.
 * Create a user with same `uid` and `gid` of project directory and named `$DEVENV_USER` if `DEVENV_GROUP` and `DEVENV_USER` are defined.
