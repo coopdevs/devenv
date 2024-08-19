@@ -38,15 +38,21 @@ HOST="$NAME.local"
 DEVENV_USER="<user that will own the project>"
 DEVENV_GROUP="<group that will own the project>"
 
-# Optional -- To mount a project.
+# Optional -- To mount projects.
 # If you don't need a shared dir between host and guest, just
 # comment the lines or unset them. Empty string doesn't work.
 # Otherwise, if you need the shared mount, set the vars below and
-# make sure that the directory "../$PROJECT_NAME" exists
-# in the host machine before executing this script.
-PROJECT_NAME="<project name>"
-PROJECT_PATH="${PWD%/*}/$PROJECT_NAME"
-BASE_PATH="<base project path>"
+# make sure that the directories exists in the host machine
+# before executing this script.
+# The name of the directories will be the name of the folders
+# in the container. For example, if you have a directory
+# "/path/to/first_directory" in the host machine, the container
+# will have a folder "first_directory" in the BASE_PATH.
+PROJECT_PATHS=(
+    "/path/to/first_directory"
+    "/path/to/second_directory"
+)
+BASE_PATH="/opt"
 
 # Select the python interpeter python2.7 or python3
 PYTHON_INTERPRETER=python3
@@ -123,16 +129,34 @@ fi
 
 # About PROJECT_PATH:
 # If it is not set, skip this section
-if [ ! -v PROJECT_PATH ] ; then
-  echo "PROJECT_PATH is undefined, will not mount a host-container shared directory"
-# If defined but does not exists, exit with an error
-elif [ ! -d "$PROJECT_PATH" ]; then
-  echo "Shared directory \"$PROJECT_PATH\" does not exist. Create it or unset variable \$PROJECT_PATH"
-  exit 1
-# Otherwise, we've got what we need. Configure the container to mount the shared dir.
+# Check if PROJECT_PATHS is set and if not use PROJECT_PATH
+if [ -z "${PROJECT_PATHS+x}" ]; then
+    # PROJECT_PATHS is not set. Check if PROJECT_PATH is set.
+    if [ -n "${PROJECT_PATH+x}" ]; then
+        # PROJECT_PATH is set. Create an array with PROJECT_PATH and assign it to PROJECT_PATHS.
+        PROJECT_PATHS=("${PROJECT_PATH}")
+    else
+        # PROJECT_PATH is not set. Initialize PROJECT_PATHS to an empty array.
+        PROJECT_PATHS=()
+    fi
+fi
+
+# Check if PROJECT_PATHS has content
+if [ "${#PROJECT_PATHS[@]}" -gt 0 ]; then
+    # Iterate over PROJECT_PATHS
+    for path in "${PROJECT_PATHS[@]}"; do
+      if [ ! -d "$path" ]; then
+        echo "Shared directory \"$PROJECT_PATH\" does not exist. Create it or unset variable \$PROJECT_PATH"
+        exit 1
+      # Otherwise, we've got what we need. Configure the container to mount the shared dir.
+      else
+        mount_folder_name=$(basename "$path")
+        mount_entry="lxc.mount.entry = $path /var/lib/lxc/$NAME/rootfs$BASE_PATH/$mount_folder_name/$PROJECT_POST_PATH none bind,create=dir 0.0"
+        echo "$mount_entry" >> "$LXC_CONFIG"
+      fi
+    done
 else
-  mount_entry="lxc.mount.entry = $PROJECT_PATH /var/lib/lxc/$NAME/rootfs$BASE_PATH/$PROJECT_NAME/$PROJECT_POST_PATH none bind,create=dir 0.0"
-  echo "$mount_entry" >> "$LXC_CONFIG"
+  echo "PROJECT_PATH is undefined, will not mount a host-container shared directory"
 fi
 
 if [ -z "${HOSTS}" ] ; then
@@ -146,9 +170,12 @@ echo "  - Distribution: $DISTRIBUTION"
 echo "  - Release: $RELEASE"
 echo "  - LXC Configuration: $LXC_CONFIG"
 echo "  - Hosts: $HOSTS"
-echo "  - Project Name: $PROJECT_NAME"
-echo "  - Project Directory: $PROJECT_PATH"
-echo "  - Will mount on: $BASE_PATH/$PROJECT_NAME"
+for path in "${PROJECT_PATHS[@]}"; do
+  mount_folder_name=$(basename "$path")
+  echo "  - Project Name: $mount_folder_name"
+  echo "  - Project Directory: $path"
+  echo "  - Will mount on: $BASE_PATH/$mount_folder_name"
+done
 echo "  - User: $DEVENV_USER"
 echo "  - Group: $DEVENV_GROUP"
 echo
@@ -248,7 +275,8 @@ sudo lxc-attach -n "$NAME" -- /bin/bash -c "/bin/mkdir -p /root/.ssh && echo $SS
 sudo lxc-attach -n "$NAME" -- apt install sudo
 
 # User management related with projects folder
-if  [ -v PROJECT_PATH ] ; then
+if [ "${#PROJECT_PATHS[@]}" -gt 0 ]; then
+  PROJECT_PATH="${PROJECT_PATHS[0]}"
   # Find `uid` of project directory
   PROJECT_USER=$(stat -c '%U' "$PROJECT_PATH")
   PROJECT_UID=$(id -u "$PROJECT_USER")

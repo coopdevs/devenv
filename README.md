@@ -45,11 +45,20 @@ HOST="local.$NAME.coop"
 DEVENV_USER="<user that will own the project>"
 DEVENV_GROUP="<group that will own the project>"
 
-# Optional -- To mount a project.
-# Make sure that the directory "../$PROJECT_NAME" exists
-# in the host machine before executing this script.
-PROJECT_NAME="<project name>"
-PROJECT_PATH="${PWD%/*}/$PROJECT_NAME"
+# Optional -- To mount projects.
+# If you don't need a shared dir between host and guest, just
+# comment the lines or unset them. Empty string doesn't work.
+# Otherwise, if you need the shared mount, set the vars below and
+# make sure that the directories exists in the host machine
+# before executing this script.
+# The name of the directories will be the name of the folders
+# in the container. For example, if you have a directory
+# "/path/to/first_directory" in the host machine, the container
+# will have a folder "first_directory" in the BASE_PATH.
+PROJECT_PATHS=(
+    "/path/to/first_directory"
+    "/path/to/second_directory"
+)
 BASE_PATH="<base project path>"
 PROJECT_POST_PATH="<post project path>"
 
@@ -64,7 +73,7 @@ Then run `devenv` in your project directory.
 The script will:
 
 * Create a container
-* Mount your project directory into container in `/<BASE_PATH>/<PROJECT_NAME>/<PROJECT_POST_PATH>`
+* Mount your project directories into container in `/<BASE_PATH>/<PROJECT_NAME>/<PROJECT_POST_PATH>`
 * Add container IP to `/etc/hosts`
 * Create a group with same `gid` of project directory and named `$DEVENV_GROUP` if `DEVENV_GROUP` and `DEVENV_USER` are defined.
 * Create a user with same `uid` and `gid` of project directory and named `$DEVENV_USER` if `DEVENV_GROUP` and `DEVENV_USER` are defined.
