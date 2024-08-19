@@ -192,7 +192,7 @@ echo "Container is running"
 
 # Wait to start container and check the IP
 COUNT=1
-IP_CONTAINER="$(sudo lxc-info -n "$NAME" -iH | grep -oP '(\d{1,3}\.){3}\d{1,3}')"
+IP_CONTAINER="$(sudo lxc-info -n "$NAME" -iH)"
 while [ -z "$IP_CONTAINER" ] ; do
   # LOOP START #
   if [ "$COUNT" -gt "$RETRIES" ]; then
@@ -208,6 +208,7 @@ while [ -z "$IP_CONTAINER" ] ; do
   # LOOP END #
   IP_CONTAINER="$(sudo lxc-info -n "$NAME" -iH)"
 done
+IP_CONTAINER="$(echo "$IP_CONTAINER" | grep -oP '(\d{1,3}\.){3}\d{1,3}')"
 echo "Container has IP address: $IP_CONTAINER"
 echo
 
