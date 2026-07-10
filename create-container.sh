@@ -133,7 +133,7 @@ lxc.net.0.hwaddr = $MAC_ADDR
 
 # For docker
 lxc.apparmor.profile = unconfined
-lxc.cgroup.devices.allow = a
+lxc.cgroup2.devices.allow = a
 lxc.cap.drop =
 
 # Volumes"
